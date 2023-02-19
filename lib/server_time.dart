@@ -68,14 +68,30 @@ class ServerDateTime {
   late tz.Location serverTimeZone;
 
 
-  ServerDateTime({bool isConvert = false}) {
+  /**
+
+    The constructor takes a parameter 'shouldAdjustTime'
+        - true : (default) it prepares the object to alter the input time value (time value gets changed!)
+        - false: prepares the object such that the given time value is not changed
+
+      But in both true | false cases, the timezone get changed.
+
+      Note:
+      There is no interface to change the timezoneName.
+
+   */
+
+  ServerDateTime({bool shouldAdjustTime = true}) {
     tz.initializeTimeZones();
 
     serverTimeZone = tz.getLocation(timeZoneName!);
-    // dt = tz.TZDateTime.now(serverTimeZone);
     DateTime d = DateTime.now();
+
+    //Maps the current local time to Server time
     dt = tz.TZDateTime.from(d, serverTimeZone);
-    if (isConvert) {
+
+    //If you want to RETAIN the local time as is, but set a different timezone)
+    if (!shouldAdjustTime) {
       //This offset is wrt UTC
       int gmt_offset = dt.timeZone.offset;
 
@@ -86,14 +102,11 @@ class ServerDateTime {
 
   //Input comes in local DateTime!
   ServerDateTime toServerDateTime(DateTime ip_dt) {
-
     serverTimeZone = tz.getLocation(timeZoneName!);
 
     //This adjusts for server offset
     tz.TZDateTime newDateTime =
-    // DateTime.fromMillisecondsSinceEpoch(d.millisecondsSinceEpoch +
-    //      offset);
-    tz.TZDateTime.fromMillisecondsSinceEpoch(serverTimeZone, ip_dt.millisecondsSinceEpoch +
+        tz.TZDateTime.fromMillisecondsSinceEpoch(serverTimeZone, ip_dt.millisecondsSinceEpoch +
         offset);
 
     dt = tz.TZDateTime.from(newDateTime, serverTimeZone);
@@ -102,29 +115,19 @@ class ServerDateTime {
     return this;
   }
 
-  //Input comes in local DateTime!
-  ServerDateTime toServerDateTime2 (String ip_dt) {
-
+  tz.TZDateTime toTZDateTime (String ip_dt) {
     serverTimeZone = tz.getLocation(timeZoneName!);
-    tz.TZDateTime d = tz.TZDateTime.parse(serverTimeZone, ip_dt);
-
-    //
-    // //This adjusts for server offset
-    tz.TZDateTime newDateTime =
-   // DateTime.fromMillisecondsSinceEpoch(d.millisecondsSinceEpoch +
-   //      offset);
-    tz.TZDateTime.fromMillisecondsSinceEpoch(serverTimeZone, d.millisecondsSinceEpoch +
-        offset);
-    
-    
-    //
-    dt = tz.TZDateTime.from(newDateTime, serverTimeZone);
-    // dt_str = dt.toString();
-
-
-    return this;
-
-    return this;
+    return tz.TZDateTime.parse(serverTimeZone, ip_dt);
   }
+
+  //Input comes in local DateTime!
+  // ServerDateTime toServerDateTime2 (String ip_dt) {
+  //
+  //   serverTimeZone = tz.getLocation(timeZoneName!);
+  //   dt = tz.TZDateTime.parse(serverTimeZone, ip_dt);
+  //   dt_str = dt.toString();
+  //
+  //   return this;
+  // }
 
 }

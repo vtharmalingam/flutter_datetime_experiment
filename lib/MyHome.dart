@@ -5,13 +5,6 @@ import 'package:flutter_datetime_experiment/server_time.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart';
 
-// import 'package:timezone/browser.dart';
-enum MyDateFormat {
-  DATETIME, //'yyyy-MM-dd HH:mm:ss'
-  DATE_LONG, //'yyyy-MM-dd'
-  DATE_SHORT, //'yMMMMd'
-  TIME //'hh:mm:ss'
-}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -35,7 +28,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
 
-    fromController.text = ServerDateTime().dt.toString();
+    fromController.text = ServerDateTime(shouldAdjustTime:false).dt.toString();
   }
 
   @override
@@ -60,17 +53,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () => _showDialog(
                 MyDateTimePicker(
-//toServerDateTime(DateTime.parse(fromController.text))
-                //ServerDateTime(isConvert: true).toServerDateTime(dt).dt
-                  initialDateTime:   ServerDateTime(isConvert: true).toServerDateTime2 (fromController.text).dt,
+                  //
+                  initialDateTime: ServerDateTime(shouldAdjustTime: false).toTZDateTime (fromController.text),
                   use24hFormat: true,
                   // This is called when the user changes the dateTime.
-                  onDateTimeChanged: (DateTime newDateTime) {
+                  onDateTimeChanged: (DateTime newdt) {
                     setState(() {
-                      fromController.text = formatDateTimeToStr(
-                        dt: newDateTime,
-                        fmt: MyDateFormat.DATETIME,
-                      );
+                      fromController.text = ServerDateTime(shouldAdjustTime: false).toServerDateTime(newdt).dt.toString();
                     });
                   },
                 ),
@@ -90,13 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 toController.text += "TO DATETIME:\n";
                 TZDateTime dt2 =
-                    ServerDateTime(isConvert: false).toServerDateTime(dt).dt;
+                    ServerDateTime(shouldAdjustTime: true).toServerDateTime(dt).dt;
                 toController.text += "(False)DT:" + dt2.toString() + "\n";
                 toController.text +=
                     "TimeZone:" + timezoneNames2[dt2.timeZone.offset] + "\n";
                 toController.text += "\n";
 
-                dt2 = ServerDateTime(isConvert: true).toServerDateTime(dt).dt;
+                dt2 = ServerDateTime(shouldAdjustTime: false).toServerDateTime(dt).dt;
                 toController.text += "(True) DT:" + dt2.toString() + "\n";
                 toController.text +=
                     "TimeZone:" + timezoneNames2[dt2.timeZone.offset] + "\n";
@@ -123,34 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  //This converts DateTime to String
-  static String formatDateTimeToStr(
-      {required DateTime dt, required MyDateFormat fmt}) {
-    DateFormat formatter = resolveFormater(fmt);
-    return formatter.format(dt);
-  }
 
-  //Based on the format required (enum), DateFormat instance is provided
-  static DateFormat resolveFormater(MyDateFormat fmt) {
-    DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-
-    switch (fmt) {
-      case MyDateFormat.DATETIME:
-        formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-        break;
-      case MyDateFormat.DATE_LONG:
-        formatter = DateFormat('yyyy-MM-dd');
-        break;
-      case MyDateFormat.DATE_SHORT:
-        formatter = DateFormat('yMMMMd');
-        break;
-      case MyDateFormat.TIME:
-        formatter = DateFormat('HH:mm:ss');
-        break;
-    }
-
-    return formatter;
-  }
 
   // This function displays a CupertinoModalPopup with a reasonable fixed height
   // which hosts CupertinoDatePicker.
