@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
 
-    fromController.text = DateTime.now().toString();
+    fromController.text = ServerDateTime().dt.toString();
   }
 
   @override
@@ -60,7 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () => _showDialog(
                 MyDateTimePicker(
-                  initialDateTime: ServerDateTime().dt,
+//toServerDateTime(DateTime.parse(fromController.text))
+                //ServerDateTime(isConvert: true).toServerDateTime(dt).dt
+                  initialDateTime:   ServerDateTime(isConvert: true).toServerDateTime2 (fromController.text).dt,
                   use24hFormat: true,
                   // This is called when the user changes the dateTime.
                   onDateTimeChanged: (DateTime newDateTime) {
@@ -79,9 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
               ),
               onPressed: () {
+
                 DateTime dt = DateTime.parse(fromController.text);
 
-                toController.text += "FROM DATETIME:\n";
+                toController.text = "FROM DATETIME:\n";
                 toController.text += dt.timeZoneName.toString() + "\n";
                 toController.text += "\n\n\n";
 

@@ -60,6 +60,7 @@ Map<int, String> timeZoneNames = {
 //That is required for cases like setting expiration time for pending orders
 class ServerDateTime {
   late tz.TZDateTime dt;
+  late String dt_str;
   int offset = 0;
   late Duration duration;
 
@@ -69,8 +70,11 @@ class ServerDateTime {
 
   ServerDateTime({bool isConvert = false}) {
     tz.initializeTimeZones();
+
     serverTimeZone = tz.getLocation(timeZoneName!);
-    dt = tz.TZDateTime.now(serverTimeZone);
+    // dt = tz.TZDateTime.now(serverTimeZone);
+    DateTime d = DateTime.now();
+    dt = tz.TZDateTime.from(d, serverTimeZone);
     if (isConvert) {
       //This offset is wrt UTC
       int gmt_offset = dt.timeZone.offset;
@@ -83,12 +87,42 @@ class ServerDateTime {
   //Input comes in local DateTime!
   ServerDateTime toServerDateTime(DateTime ip_dt) {
 
-    tz.initializeTimeZones();
     serverTimeZone = tz.getLocation(timeZoneName!);
 
     //This adjusts for server offset
-    DateTime newDateTime = DateTime.fromMillisecondsSinceEpoch(ip_dt.millisecondsSinceEpoch + offset);
+    tz.TZDateTime newDateTime =
+    // DateTime.fromMillisecondsSinceEpoch(d.millisecondsSinceEpoch +
+    //      offset);
+    tz.TZDateTime.fromMillisecondsSinceEpoch(serverTimeZone, ip_dt.millisecondsSinceEpoch +
+        offset);
+
     dt = tz.TZDateTime.from(newDateTime, serverTimeZone);
+    dt_str = dt.toString();
+
+    return this;
+  }
+
+  //Input comes in local DateTime!
+  ServerDateTime toServerDateTime2 (String ip_dt) {
+
+    serverTimeZone = tz.getLocation(timeZoneName!);
+    tz.TZDateTime d = tz.TZDateTime.parse(serverTimeZone, ip_dt);
+
+    //
+    // //This adjusts for server offset
+    tz.TZDateTime newDateTime =
+   // DateTime.fromMillisecondsSinceEpoch(d.millisecondsSinceEpoch +
+   //      offset);
+    tz.TZDateTime.fromMillisecondsSinceEpoch(serverTimeZone, d.millisecondsSinceEpoch +
+        offset);
+    
+    
+    //
+    dt = tz.TZDateTime.from(newDateTime, serverTimeZone);
+    // dt_str = dt.toString();
+
+
+    return this;
 
     return this;
   }
